@@ -6,9 +6,21 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import mysql from 'mysql2/promise'
 import { agentConversation, executeTools } from './agents/recruitingAgent.js'
 
 dotenv.config()
+
+// GMTM Database pool (READ ONLY)
+const gmtmPool = mysql.createPool({
+  host: process.env.GMTM_DB_HOST,
+  user: process.env.GMTM_DB_USER,
+  password: process.env.GMTM_DB_PASSWORD,
+  database: process.env.GMTM_DB_NAME,
+  port: parseInt(process.env.GMTM_DB_PORT || '3306'),
+  waitForConnections: true,
+  connectionLimit: 5,
+})
 
 const app = express()
 const PORT = process.env.PORT || 8000
@@ -188,6 +200,43 @@ app.get('/api/opportunities/:user_id', async (req, res) => {
     opportunities: mockOpportunities.slice(0, parseInt(limit)),
     total: mockOpportunities.length
   })
+})
+
+/**
+ * Search GMTM athletes by name (READ ONLY)
+ * GET /api/athlete/search?q=name
+ */
+app.get('/api/athlete/search', async (req, res) => {
+  const { q } = req.query
+  if (!q || typeof q !== 'string' || q.trim().length < 2) {
+    return res.json({ athletes: [] })
+  }
+
+  try {
+    const searchTerm = `%${q.trim()}%`
+    const [rows] = await gmtmPool.query(`
+      SELECT u.user_id, u.first_name, u.last_name, u.graduation_year,
+             l.city, l.province as state,
+             p.abbreviation as position,
+             s.name as sport
+      FROM users u
+      LEFT JOIN locations l ON u.location_id = l.location_id
+      LEFT JOIN career c ON u.user_id = c.user_id AND c.is_current = 1
+      LEFT JOIN user_positions up ON c.career_id = up.career_id
+      LEFT JOIN positions p ON up.position_id = p.position_id
+      LEFT JOIN sports s ON c.sport_id = s.sport_id
+      WHERE u.type = 1 AND u.visibility = 2
+        AND (CONCAT(u.first_name, ' ', u.last_name) LIKE ? OR u.last_name LIKE ?)
+      GROUP BY u.user_id
+      ORDER BY u.last_name, u.first_name
+      LIMIT 20
+    `, [searchTerm, searchTerm])
+
+    res.json({ athletes: rows })
+  } catch (error) {
+    console.error('Athlete search error:', error)
+    res.status(500).json({ error: 'Search failed' })
+  }
 })
 
 // Error handling

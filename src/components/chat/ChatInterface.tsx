@@ -147,7 +147,7 @@ export function ChatInterface() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const { messages, isSearching, addMessage, setSearching, addSavedSearch } = useChatStore()
-  const { token } = useAuthStore()
+  const { token, user } = useAuthStore()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -181,7 +181,7 @@ export function ChatInterface() {
 
     try {
       // Use streaming API
-      const response = await chatStream(userMessage, token, handleStreamEvent)
+      const response = await chatStream(userMessage, token, handleStreamEvent, user?.gmtmUserId)
 
       // Add assistant response
       addMessage({

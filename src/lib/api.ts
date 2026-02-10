@@ -253,7 +253,8 @@ export async function chat(message: string, token?: string): Promise<ChatRespons
 export async function chatStream(
   message: string,
   token?: string,
-  onEvent?: (event: StreamEvent) => void
+  onEvent?: (event: StreamEvent) => void,
+  athleteUserId?: number | null
 ): Promise<ChatResponse> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -266,7 +267,7 @@ export async function chatStream(
   const response = await fetch(`${API_URL}/scout/chat/stream`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, athlete_user_id: athleteUserId || undefined }),
   })
 
   if (!response.ok) {

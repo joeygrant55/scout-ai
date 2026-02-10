@@ -8,6 +8,7 @@ export default defineSchema({
     firstName: v.string(),
     lastName: v.string(),
     organization: v.optional(v.string()),
+    gmtmUserId: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_email", ["email"]),
 

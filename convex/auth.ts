@@ -28,7 +28,6 @@ export const register = mutation({
     organization: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Check if email already exists
     const existing = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
@@ -38,7 +37,6 @@ export const register = mutation({
       throw new Error("Email already registered");
     }
 
-    // Create user
     const userId = await ctx.db.insert("users", {
       email: args.email.toLowerCase(),
       passwordHash: simpleHash(args.password),
@@ -48,9 +46,8 @@ export const register = mutation({
       createdAt: Date.now(),
     });
 
-    // Create session
     const token = generateToken();
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
     await ctx.db.insert("sessions", {
       userId,
@@ -68,6 +65,7 @@ export const register = mutation({
         firstName: args.firstName,
         lastName: args.lastName,
         organization: args.organization,
+        gmtmUserId: undefined,
       },
     };
   },
@@ -92,9 +90,8 @@ export const login = mutation({
       throw new Error("Invalid email or password");
     }
 
-    // Create new session
     const token = generateToken();
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
     await ctx.db.insert("sessions", {
       userId: user._id,
@@ -112,6 +109,7 @@ export const login = mutation({
         firstName: user.firstName,
         lastName: user.lastName,
         organization: user.organization,
+        gmtmUserId: user.gmtmUserId,
       },
     };
   },
@@ -142,7 +140,31 @@ export const validateSession = query({
       firstName: user.firstName,
       lastName: user.lastName,
       organization: user.organization,
+      gmtmUserId: user.gmtmUserId,
     };
+  },
+});
+
+export const linkGmtmProfile = mutation({
+  args: {
+    token: v.string(),
+    gmtmUserId: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("Invalid session");
+    }
+
+    await ctx.db.patch(session.userId, {
+      gmtmUserId: args.gmtmUserId,
+    });
+
+    return { success: true };
   },
 });
 

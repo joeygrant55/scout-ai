@@ -3,29 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useMutation } from 'convex/react'
 import { api } from '../../../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/authStore'
-
-// SPARQ Logo Component
-function SPARQLogo() {
-  return (
-    <div className="mx-auto mb-5 w-20 h-20 rounded-2xl bg-gradient-to-br from-gmtm-lime to-gmtm-lime/80 flex items-center justify-center shadow-lg shadow-gmtm-lime/20">
-      <svg viewBox="0 0 32 32" className="w-12 h-12" fill="none">
-        <path
-          d="M6 18C6 12.5 10.5 8 16 8C21.5 8 26 12.5 26 18"
-          stroke="#1e2433"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <circle cx="26" cy="26" r="4" fill="#1e2433"/>
-      </svg>
-    </div>
-  )
-}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -47,13 +31,20 @@ export default function LoginPage() {
 
       setToken(result.token)
       setUser({
-        user_id: 1,
+        user_id: result.user.gmtmUserId ?? 0,
         email: result.user.email,
         first_name: result.user.firstName,
         last_name: result.user.lastName,
         organization: result.user.organization,
+        gmtmUserId: result.user.gmtmUserId,
       })
-      router.push('/chat')
+
+      // If profile is linked, go to chat. Otherwise, connect first.
+      if (result.user.gmtmUserId) {
+        router.push('/chat')
+      } else {
+        router.push('/connect')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password')
     } finally {
@@ -65,8 +56,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gmtm-bg-secondary to-gmtm-bg">
       <Card className="w-full max-w-md border-2 shadow-card-hover">
         <CardHeader className="text-center pb-2">
-          <SPARQLogo />
-          <CardTitle className="text-3xl font-bold text-gmtm-text">SPARQ</CardTitle>
+          <div className="mx-auto mb-4">
+            <Image
+              src="/sparq-logo-white.png"
+              alt="SPARQ"
+              width={160}
+              height={40}
+              className="h-10 w-auto mx-auto"
+              priority
+            />
+          </div>
           <CardDescription className="text-gmtm-text-secondary">
             Talent discovery for coaches and scouts
           </CardDescription>

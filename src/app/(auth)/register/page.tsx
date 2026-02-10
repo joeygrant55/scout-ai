@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useMutation } from 'convex/react'
 import { api } from '../../../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
@@ -13,16 +14,15 @@ import { useAuthStore } from '@/stores/authStore'
 // SPARQ Logo Component
 function SPARQLogo() {
   return (
-    <div className="mx-auto mb-5 w-20 h-20 rounded-2xl bg-gradient-to-br from-gmtm-lime to-gmtm-lime/80 flex items-center justify-center shadow-lg shadow-gmtm-lime/20">
-      <svg viewBox="0 0 32 32" className="w-12 h-12" fill="none">
-        <path
-          d="M6 18C6 12.5 10.5 8 16 8C21.5 8 26 12.5 26 18"
-          stroke="#1e2433"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <circle cx="26" cy="26" r="4" fill="#1e2433"/>
-      </svg>
+    <div className="mx-auto mb-4">
+      <Image
+        src="/sparq-logo-white.png"
+        alt="SPARQ"
+        width={160}
+        height={40}
+        className="h-10 w-auto mx-auto"
+        priority
+      />
     </div>
   )
 }
@@ -65,13 +65,14 @@ export default function RegisterPage() {
 
       setToken(result.token)
       setUser({
-        user_id: 1,
+        user_id: 0,
         email: result.user.email,
         first_name: result.user.firstName,
         last_name: result.user.lastName,
         organization: result.user.organization,
+        gmtmUserId: null,
       })
-      router.push('/chat')
+      router.push('/connect')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {

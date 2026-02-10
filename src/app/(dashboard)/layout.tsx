@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { Sidebar } from '@/components/layout/Sidebar'
 
@@ -11,14 +11,20 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { token, user, isAuthenticated, checkAuth } = useAuthStore()
+  const pathname = usePathname()
+  const { token, user, checkAuth } = useAuthStore()
 
   useEffect(() => {
     checkAuth()
     if (!token || !user) {
       router.push('/login')
+      return
     }
-  }, [token, user, router, checkAuth])
+    // If no GMTM profile linked and not already on /connect, redirect
+    if (!user.gmtmUserId && pathname !== '/connect') {
+      router.push('/connect')
+    }
+  }, [token, user, router, checkAuth, pathname])
 
   if (!token || !user) {
     return (
@@ -26,6 +32,11 @@ export default function DashboardLayout({
         <div className="animate-pulse text-gmtm-text-secondary">Redirecting to login...</div>
       </div>
     )
+  }
+
+  // Connect page gets full screen (no sidebar)
+  if (pathname === '/connect') {
+    return <>{children}</>
   }
 
   return (

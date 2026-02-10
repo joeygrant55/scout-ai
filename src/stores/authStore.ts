@@ -7,6 +7,7 @@ export interface User {
   first_name: string
   last_name: string
   organization?: string
+  gmtmUserId?: number | null
 }
 
 interface AuthState {
@@ -18,6 +19,7 @@ interface AuthState {
   // Actions
   setToken: (token: string) => void
   setUser: (user: User) => void
+  setGmtmUserId: (id: number) => void
   logout: () => void
   checkAuth: () => void
 }
@@ -38,11 +40,17 @@ export const useAuthStore = create<AuthState>()(
         set({ user, isAuthenticated: true })
       },
 
+      setGmtmUserId: (id: number) => {
+        const user = get().user
+        if (user) {
+          set({ user: { ...user, gmtmUserId: id } })
+        }
+      },
+
       logout: () => {
         set({ token: null, user: null, isAuthenticated: false })
       },
 
-      // Simple auth check - just verify we have token and user
       checkAuth: () => {
         const { token, user } = get()
         if (token && user) {
@@ -56,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
       name: 'scout-ai-auth',
       partialize: (state) => ({
         token: state.token,
-        user: state.user
+        user: state.user,
       }),
     }
   )
