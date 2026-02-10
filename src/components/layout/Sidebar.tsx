@@ -1,26 +1,24 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatStore } from '@/stores/chatStore'
 
-// SPARQ Logo Component - Inline SVG for reliable rendering
+// SPARQ Logo Component - Image logo
 function SPARQLogo() {
   return (
-    <div className="flex items-center gap-2">
-      <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
-        <rect width="32" height="32" rx="8" fill="#c8e84b"/>
-        <path
-          d="M8 16.5C8 12.9 10.9 10 14.5 10C18.1 10 21 12.9 21 16.5"
-          stroke="#1e2433"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-        <circle cx="21" cy="21" r="3" fill="#1e2433"/>
-      </svg>
-      <span className="text-white font-bold text-xl tracking-tight">SPARQ</span>
+    <div className="flex items-center">
+      <Image
+        src="/sparq-logo-white.png"
+        alt="SPARQ"
+        width={120}
+        height={32}
+        className="h-8 w-auto"
+        priority
+      />
     </div>
   )
 }
