@@ -69,7 +69,6 @@ export function Sidebar() {
       {/* Logo & Brand */}
       <div className="px-5 py-5 border-b border-white/10">
         <SPARQLogo />
-        <p className="text-gmtm-text-light text-xs mt-1 ml-10">Talent Discovery</p>
       </div>
 
       {/* New Search Button */}

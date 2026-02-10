@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useChatStore, Message } from '@/stores/chatStore'
@@ -229,20 +230,19 @@ export function ChatInterface() {
         {showSuggestions ? (
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10">
-              {/* SPARQ Logo Icon */}
-              <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-gmtm-lime to-gmtm-lime/80 flex items-center justify-center shadow-lg shadow-gmtm-lime/20">
-                <svg viewBox="0 0 32 32" className="w-12 h-12" fill="none">
-                  <path
-                    d="M6 18C6 12.5 10.5 8 16 8C21.5 8 26 12.5 26 18"
-                    stroke="#1e2433"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="26" cy="26" r="4" fill="#1e2433"/>
-                </svg>
+              {/* SPARQ Logo */}
+              <div className="mx-auto mb-5">
+                <Image
+                  src="/sparq-logo-white.png"
+                  alt="SPARQ"
+                  width={200}
+                  height={50}
+                  className="h-12 w-auto mx-auto"
+                  priority
+                />
               </div>
               <h2 className="text-3xl font-bold text-gmtm-text mb-3">
-                SPARQ Talent Discovery
+                Talent Discovery
               </h2>
               <p className="text-gmtm-text-secondary max-w-lg mx-auto text-base leading-relaxed">
                 AI-powered athlete search with real-time database queries.
